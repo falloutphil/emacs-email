@@ -29,13 +29,17 @@ class Auth(object):
   def password(self):
       return self.__password
 
+# As offlineimap is multithreaded, you want to get the gpg
+# password only once at extension import time
+getPasswordOnce=getpass.getpass()
+
 # Hint:
 # remotepasseval = get_password('imap.mail.com', '993', 'user@foo.com')
 def get_password(machine=None, port=None, login=None, authinfo='~/.authinfo.gpg'):
     auth = Auth(machine, port, login)
     data = gnupg.GPG().decrypt_file(
         open(os.path.expanduser(authinfo),'rb'),
-        passphrase=getpass.getpass())
+        passphrase=getPasswordOnce)
 
     # Decrypt failed
     if (not data.ok):
